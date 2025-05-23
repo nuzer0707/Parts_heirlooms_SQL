@@ -47,7 +47,7 @@ LOCK TABLES `users` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `categories` (保持您 dump 中的極簡版本)
+-- Table structure for table `categories`
 --
 DROP TABLE IF EXISTS `categories`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -84,7 +84,7 @@ CREATE TABLE `products` (
   `status` enum('For Sale','Sold','Removed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'For Sale' COMMENT '狀態',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '商品核心記錄建立時間',
   PRIMARY KEY (`product_id`),
-  KEY `idx_products_seller_v_cs` (`seller_user_id`), -- cs for content_split
+  KEY `idx_products_seller_v_cs` (`seller_user_id`), 
   KEY `idx_products_category_v_cs` (`category_id`),
   CONSTRAINT `fk_products_category_v_cs` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_products_seller_v_cs` FOREIGN KEY (`seller_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -206,7 +206,7 @@ INSERT INTO `transaction_methods` VALUES (1,'郵寄','透過郵局或快遞寄�
 UNLOCK TABLES;
 
 --
--- Table structure for table `product_transaction_details`
+-- Table structure for table `product_transaction_details` (方案L - 7 欄)
 --
 DROP TABLE IF EXISTS `product_transaction_details`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -215,16 +215,17 @@ CREATE TABLE `product_transaction_details` (
   `detail_id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '詳情記錄 ID (PK)',
   `product_id` int unsigned NOT NULL COMMENT '相關商品 ID (FK)',
   `method_id` int unsigned NOT NULL COMMENT '採用的交易方式 ID (FK)',
-  `notes` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '此交易方式的備註 (例如: 面交時間地點)',
-  `meetup_latitude` decimal(10,8) DEFAULT NULL COMMENT '面交緯度 (若為面交方式)',
-  `meetup_longitude` decimal(11,8) DEFAULT NULL COMMENT '面交經度 (若為面交方式)',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '建立時間',
+  `meetup_time` TIME DEFAULT NULL COMMENT '建議面交時間 (例如 19:00:00, 僅 method_id 為面交時填寫)',
+  `general_notes` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '通用說明 (面交地點/日期補充, 郵寄N天內出貨承諾, 運費等)',
+  `meetup_latitude` decimal(10,8) DEFAULT NULL COMMENT '面交緯度 (僅當 method_id 為面交時有效)',
+  `meetup_longitude` decimal(11,8) DEFAULT NULL COMMENT '面交經度 (僅當 method_id 為面交時有效)',
+  -- `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '建立時間 (已移除)',
   PRIMARY KEY (`detail_id`),
-  KEY `idx_ptd_product_final` (`product_id`),
-  KEY `idx_ptd_method_final` (`method_id`),
-  CONSTRAINT `fk_ptd_method_final` FOREIGN KEY (`method_id`) REFERENCES `transaction_methods` (`method_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_ptd_product_final` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品交易方式詳情表';
+  KEY `idx_ptd_product_l_final` (`product_id`),
+  KEY `idx_ptd_method_l_final` (`method_id`),
+  CONSTRAINT `fk_ptd_method_l_final` FOREIGN KEY (`method_id`) REFERENCES `transaction_methods` (`method_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ptd_product_l_final` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品交易方式詳情表 (面交TIME, 通用notes, 7欄)';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -236,7 +237,7 @@ LOCK TABLES `product_transaction_details` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `transactions`
+-- Table structure for table `transactions` (方案K - 10 欄)
 --
 DROP TABLE IF EXISTS `transactions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -248,19 +249,20 @@ CREATE TABLE `transactions` (
   `buyer_user_id` int unsigned NOT NULL COMMENT '買家 ID (FK)',
   `chosen_transaction_detail_id` int unsigned NOT NULL COMMENT '選擇的商品交易方式詳情 ID (FK)',
   `final_price` decimal(10,2) NOT NULL COMMENT '最終成交價格',
-  `status` enum('Pending','Completed','Cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending' COMMENT '交易狀態',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '交易建立時間',
-  -- `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '交易狀態更新時間', -- 已移除
+  `status` enum('Pending Payment', 'Paid', 'Processing', 'Shipped', 'Completed', 'Cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending Payment' COMMENT '交易狀態',
+  `shipped_at` timestamp NULL DEFAULT NULL COMMENT '實際出貨時間 (賣家確認出貨時記錄)',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '交易建立時間 (訂單成立時間)',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '交易狀態最後更新時間',
   PRIMARY KEY (`transaction_id`),
-  KEY `idx_transactions_product_final` (`product_id`),
-  KEY `idx_transactions_seller_final` (`seller_user_id`),
-  KEY `idx_transactions_buyer_final` (`buyer_user_id`),
-  KEY `idx_transactions_chosen_detail_final` (`chosen_transaction_detail_id`),
-  CONSTRAINT `fk_transactions_buyer_final` FOREIGN KEY (`buyer_user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_transactions_chosen_detail_final` FOREIGN KEY (`chosen_transaction_detail_id`) REFERENCES `product_transaction_details` (`detail_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_transactions_product_final` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_transactions_seller_final` FOREIGN KEY (`seller_user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='核心交易紀錄';
+  KEY `idx_transactions_product_k_final` (`product_id`),
+  KEY `idx_transactions_seller_k_final` (`seller_user_id`),
+  KEY `idx_transactions_buyer_k_final` (`buyer_user_id`),
+  KEY `idx_transactions_chosen_detail_k_final` (`chosen_transaction_detail_id`),
+  CONSTRAINT `fk_transactions_buyer_k_final` FOREIGN KEY (`buyer_user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transactions_chosen_detail_k_final` FOREIGN KEY (`chosen_transaction_detail_id`) REFERENCES `product_transaction_details` (`detail_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transactions_product_k_final` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transactions_seller_k_final` FOREIGN KEY (`seller_user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='核心交易紀錄 (含實際出貨時間)';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
