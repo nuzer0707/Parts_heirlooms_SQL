@@ -43,6 +43,39 @@ LOCK TABLES `categories` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `issue_reports`
+--
+
+DROP TABLE IF EXISTS `issue_reports`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `issue_reports` (
+  `report_id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '回報 ID (PK)',
+  `reporter_user_id` int unsigned NOT NULL COMMENT '回報者使用者 ID (FK)',
+  `target_type` enum('PRODUCT','USER','GENERAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '回報目標類型',
+  `target_id` int unsigned DEFAULT NULL COMMENT '回報目標的 ID (若適用，例如 product_id 或 user_id)',
+  `reason_category` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '回報原因分類 (更通用的分類)',
+  `details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '詳細說明',
+  `status` enum('Open','In Progress','Resolved','Closed','Invalid') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Open' COMMENT '處理狀態',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '提交時間',
+  PRIMARY KEY (`report_id`),
+  KEY `idx_ir_reporter` (`reporter_user_id`),
+  KEY `idx_ir_target` (`target_type`,`target_id`),
+  KEY `idx_ir_status_reason` (`status`,`reason_category`),
+  CONSTRAINT `fk_ir_reporter` FOREIGN KEY (`reporter_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='通用問題回報表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `issue_reports`
+--
+
+LOCK TABLES `issue_reports` WRITE;
+/*!40000 ALTER TABLE `issue_reports` DISABLE KEYS */;
+/*!40000 ALTER TABLE `issue_reports` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `messages`
 --
 
@@ -127,39 +160,6 @@ CREATE TABLE `product_images` (
 LOCK TABLES `product_images` WRITE;
 /*!40000 ALTER TABLE `product_images` DISABLE KEYS */;
 /*!40000 ALTER TABLE `product_images` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `product_reports`
---
-
-DROP TABLE IF EXISTS `product_reports`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `product_reports` (
-  `report_id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '檢舉報告 ID (PK)',
-  `product_id` int unsigned NOT NULL COMMENT '被檢舉的商品 ID (FK)',
-  `reporter_user_id` int unsigned NOT NULL COMMENT '檢舉者使用者 ID (FK)',
-  `report_reason_category` enum('Misleading Description','Incorrect Category','Prohibited Item','Counterfeit/Fake','Pricing Issue','Spam/Irrelevant','Offensive Content','Seller Behavior','Other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '檢舉原因分類',
-  `report_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '檢舉詳細說明 (檢舉者填寫)',
-  `report_status` enum('Pending Review','Under Investigation','Action Taken - Warning','Action Taken - Removed','Action Taken - User Suspended','Resolved - No Action','Invalid Report') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending Review' COMMENT '檢舉處理狀態 (由管理員更新)',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '檢舉提交時間',
-  PRIMARY KEY (`report_id`),
-  KEY `idx_pr_product_final` (`product_id`),
-  KEY `idx_pr_reporter_final` (`reporter_user_id`),
-  KEY `idx_pr_status_reason_final` (`report_status`,`report_reason_category`),
-  CONSTRAINT `fk_pr_product_final` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_pr_reporter_final` FOREIGN KEY (`reporter_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品檢舉報告表 (極簡版)';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `product_reports`
---
-
-LOCK TABLES `product_reports` WRITE;
-/*!40000 ALTER TABLE `product_reports` DISABLE KEYS */;
-/*!40000 ALTER TABLE `product_reports` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -261,6 +261,39 @@ LOCK TABLES `ratings` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `seller_verifications`
+--
+
+DROP TABLE IF EXISTS `seller_verifications`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `seller_verifications` (
+  `verification_id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '認證申請 ID (PK)',
+  `user_id` int unsigned NOT NULL COMMENT '申請認證的使用者 ID (FK)',
+  `status` enum('Pending','Approved','Rejected','Resubmit') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending' COMMENT '認證狀態',
+  `admin_remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '管理員審核備註 (例如: 拒絕原因)',
+  `submitted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '申請提交時間',
+  `reviewed_at` timestamp NULL DEFAULT NULL COMMENT '審核完成時間',
+  `reviewed_by_admin_id` int unsigned DEFAULT NULL COMMENT '審核管理員 ID (FK to users, 可選)',
+  PRIMARY KEY (`verification_id`),
+  KEY `idx_sv_user` (`user_id`),
+  KEY `idx_sv_status` (`status`),
+  KEY `idx_sv_reviewed_by` (`reviewed_by_admin_id`),
+  CONSTRAINT `fk_sv_reviewed_by_admin` FOREIGN KEY (`reviewed_by_admin_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_sv_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='賣家資格認證申請表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `seller_verifications`
+--
+
+LOCK TABLES `seller_verifications` WRITE;
+/*!40000 ALTER TABLE `seller_verifications` DISABLE KEYS */;
+/*!40000 ALTER TABLE `seller_verifications` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `transaction_methods`
 --
 
@@ -304,6 +337,7 @@ CREATE TABLE `transactions` (
   `status` enum('Pending Payment','Paid','Processing','Shipped','Completed','Cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending Payment' COMMENT '交易狀態',
   `shipped_at` timestamp NULL DEFAULT NULL COMMENT '實際出貨時間 (賣家確認出貨時記錄)',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '交易建立時間 (訂單成立時間)',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '交易狀態最後更新時間',
   PRIMARY KEY (`transaction_id`),
   KEY `idx_transactions_product_k_final` (`product_id`),
   KEY `idx_transactions_seller_k_final` (`seller_user_id`),
@@ -354,6 +388,33 @@ LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `verification_images`
+--
+
+DROP TABLE IF EXISTS `verification_images`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `verification_images` (
+  `image_id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '圖片 ID (PK)',
+  `verification_id` int unsigned NOT NULL COMMENT '關聯的認證申請 ID (FK)',
+  `image_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '圖片的路徑或 URL',
+  `uploaded_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '圖片上傳時間',
+  PRIMARY KEY (`image_id`),
+  KEY `idx_vi_verification` (`verification_id`),
+  CONSTRAINT `fk_vi_verification` FOREIGN KEY (`verification_id`) REFERENCES `seller_verifications` (`verification_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='賣家認證申請的圖片表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `verification_images`
+--
+
+LOCK TABLES `verification_images` WRITE;
+/*!40000 ALTER TABLE `verification_images` DISABLE KEYS */;
+/*!40000 ALTER TABLE `verification_images` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -364,4 +425,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-23 12:03:31
+-- Dump completed on 2025-05-27 15:30:32
