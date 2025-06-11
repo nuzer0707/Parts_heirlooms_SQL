@@ -153,7 +153,7 @@ CREATE TABLE `product_content` (
   PRIMARY KEY (`content_id`),
   UNIQUE KEY `UK8d43t7bfjejtvvbshjpv68hi6` (`product_id`),
   CONSTRAINT `FKeh88ivgn1tkvo5pwigm0bkys9` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -162,7 +162,7 @@ CREATE TABLE `product_content` (
 
 LOCK TABLES `product_content` WRITE;
 /*!40000 ALTER TABLE `product_content` DISABLE KEYS */;
-INSERT INTO `product_content` VALUES (33,'2025-06-11 15:26:44.000000','這是一款功能強大的酷睿i7處理器，擁有8核心16線程，基礎頻率3.8GHz，睿頻可達5.1GHz。適合遊戲、內容創作和多任務處理。','高性能桌面處理器，手動添加用於API測試。','手動插入的酷睿i7處理器','2025-06-11 15:26:44.000000',33);
+INSERT INTO `product_content` VALUES (33,'2025-06-11 15:26:44.000000','這是一款功能強大的酷睿i7處理器，擁有8核心16線程，基礎頻率3.8GHz，睿頻可達5.1GHz。適合遊戲、內容創作和多任務處理。','高性能桌面處理器，手動添加用於API測試。','手動插入的酷睿i7處理器','2025-06-11 15:26:44.000000',33),(40,'2025-06-11 16:52:11.164618','這是一款頂級遊戲顯卡，採用最新架構，擁有24GB GDDR6X顯存，提供無與倫比的遊戲體驗和內容創作能力。支持最新的光線追踪技術和DLSS 3.0。','體驗極致遊戲性能，光線追踪，8K遊戲就緒。','全新高性能遊戲顯卡 GTX 4090','2025-06-11 16:52:11.164618',40);
 /*!40000 ALTER TABLE `product_content` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -181,7 +181,7 @@ CREATE TABLE `product_images` (
   PRIMARY KEY (`image_id`),
   KEY `FKqnq71xsohugpqwf3c9gxmsuy` (`product_id`),
   CONSTRAINT `FKqnq71xsohugpqwf3c9gxmsuy` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -190,7 +190,7 @@ CREATE TABLE `product_images` (
 
 LOCK TABLES `product_images` WRITE;
 /*!40000 ALTER TABLE `product_images` DISABLE KEYS */;
-INSERT INTO `product_images` VALUES (27,'2025-06-11 15:26:44.000000',33,'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=');
+INSERT INTO `product_images` VALUES (27,'2025-06-11 15:26:44.000000',33,'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='),(34,'2025-06-11 16:52:11.166618',40,'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=');
 /*!40000 ALTER TABLE `product_images` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -205,7 +205,7 @@ CREATE TABLE `product_transaction_details` (
   `detail_id` int NOT NULL AUTO_INCREMENT,
   `general_notes` varchar(255) DEFAULT NULL,
   `meetup_latitude` decimal(10,8) DEFAULT NULL,
-  `meetup_longitude` decimal(10,8) DEFAULT NULL,
+  `meetup_longitude` decimal(11,8) DEFAULT NULL,
   `meetup_time` datetime(6) DEFAULT NULL,
   `product_id` int NOT NULL,
   `method_id` int NOT NULL,
@@ -214,7 +214,7 @@ CREATE TABLE `product_transaction_details` (
   KEY `FKbca9n94o1yi0r9wrw3s80vnca` (`product_id`),
   CONSTRAINT `FKbca9n94o1yi0r9wrw3s80vnca` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
   CONSTRAINT `FKdtc9nqma7l9o1jw6n1gdj2xx6` FOREIGN KEY (`method_id`) REFERENCES `transaction_methods` (`method_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -223,7 +223,7 @@ CREATE TABLE `product_transaction_details` (
 
 LOCK TABLES `product_transaction_details` WRITE;
 /*!40000 ALTER TABLE `product_transaction_details` DISABLE KEYS */;
-INSERT INTO `product_transaction_details` VALUES (24,'超商付款',NULL,NULL,NULL,33,1);
+INSERT INTO `product_transaction_details` VALUES (24,'超商付款',NULL,NULL,NULL,33,1),(25,'平日晚上或週末可約台北市捷運站面交。',25.00000000,121.00000000,'2025-07-15 18:30:00.000000',40,2);
 /*!40000 ALTER TABLE `product_transaction_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -247,7 +247,7 @@ CREATE TABLE `products` (
   KEY `FKk6lbwhosc0of49sw3j33nnwsp` (`seller_user_id`),
   CONSTRAINT `FKk6lbwhosc0of49sw3j33nnwsp` FOREIGN KEY (`seller_user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `FKr638shrnkkh3wy5llr9cwyi4t` FOREIGN KEY (`category_id`) REFERENCES `categorys` (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -256,7 +256,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (33,'2025-06-11 15:26:44.000000',1299.99,10,'For_Sale',2,2);
+INSERT INTO `products` VALUES (33,'2025-06-11 15:26:44.000000',1299.99,10,'For_Sale',2,2),(40,'2025-06-11 16:52:11.156618',1599.99,5,'For_Sale',2,2);
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -465,4 +465,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-11 16:34:33
+-- Dump completed on 2025-06-11 16:53:45
