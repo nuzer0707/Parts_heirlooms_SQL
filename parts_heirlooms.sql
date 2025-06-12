@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `partsheirlooms` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `partsheirlooms`;
--- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: localhost    Database: partsheirlooms
 -- ------------------------------------------------------
--- Server version	8.0.34
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,6 +16,37 @@ USE `partsheirlooms`;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `cart_items`
+--
+
+DROP TABLE IF EXISTS `cart_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cart_items` (
+  `cart_item_id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `quantity` int NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `product_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  PRIMARY KEY (`cart_item_id`),
+  UNIQUE KEY `UK1vhvont0fdtramle6nmghntj7` (`user_id`,`product_id`),
+  KEY `FK1re40cjegsfvw58xrkdp6bac6` (`product_id`),
+  CONSTRAINT `FK1re40cjegsfvw58xrkdp6bac6` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
+  CONSTRAINT `FK709eickf3kc0dujx3ub9i7btf` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cart_items`
+--
+
+LOCK TABLES `cart_items` WRITE;
+/*!40000 ALTER TABLE `cart_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cart_items` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `categorys`
@@ -84,7 +115,7 @@ CREATE TABLE `issue_reports` (
   `details` text,
   `reason_category` varchar(100) NOT NULL,
   `status` enum('Open','In Progress','Resolved','Closed','Invalid') NOT NULL DEFAULT 'Open',
-  `targer_id` int DEFAULT NULL,
+  `target_id` int DEFAULT NULL,
   `target_type` enum('PRODUCT','USER','GENERAL') NOT NULL,
   `reporter_user_id` int NOT NULL,
   PRIMARY KEY (`report_id`),
@@ -223,7 +254,7 @@ CREATE TABLE `product_transaction_details` (
 
 LOCK TABLES `product_transaction_details` WRITE;
 /*!40000 ALTER TABLE `product_transaction_details` DISABLE KEYS */;
-INSERT INTO `product_transaction_details` VALUES (24,'超商付款',NULL,NULL,NULL,33,1),(25,'平日晚上或週末可約台北市捷運站面交。',25.00000000,121.00000000,'2025-07-15 18:30:00.000000',40,2);
+INSERT INTO `product_transaction_details` VALUES (24,'物流 兩天內到',NULL,NULL,NULL,33,1),(25,'平日晚上或週末可約台北市捷運站面交。',25.00000000,121.00000000,'2025-07-15 18:30:00.000000',40,2);
 /*!40000 ALTER TABLE `product_transaction_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -350,8 +381,37 @@ CREATE TABLE `transaction_methods` (
 
 LOCK TABLES `transaction_methods` WRITE;
 /*!40000 ALTER TABLE `transaction_methods` DISABLE KEYS */;
-INSERT INTO `transaction_methods` VALUES (1,'2025-06-11 15:19:04.000000','透過超商寄送','超商'),(2,'2025-06-11 15:19:04.000000','買賣雙方約定地點當面交易','面交');
+INSERT INTO `transaction_methods` VALUES (1,'2025-06-11 15:19:04.000000','透過物流寄送','物流'),(2,'2025-06-11 15:19:04.000000','買賣雙方約定地點當面交易','面交');
 /*!40000 ALTER TABLE `transaction_methods` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `transaction_shipment_details`
+--
+
+DROP TABLE IF EXISTS `transaction_shipment_details`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `transaction_shipment_details` (
+  `shipment_detail_id` int NOT NULL AUTO_INCREMENT,
+  `address` varchar(255) DEFAULT NULL,
+  `meetup_time` datetime(6) DEFAULT NULL,
+  `method_name` varchar(50) NOT NULL,
+  `notes` text,
+  `transaction_id` int NOT NULL,
+  PRIMARY KEY (`shipment_detail_id`),
+  UNIQUE KEY `UKo1i0ajtncy2i4t0ohqq2d9ln9` (`transaction_id`),
+  CONSTRAINT `FK91jppd86h18x12x9qdjb0xicb` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `transaction_shipment_details`
+--
+
+LOCK TABLES `transaction_shipment_details` WRITE;
+/*!40000 ALTER TABLE `transaction_shipment_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `transaction_shipment_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -465,4 +525,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-12 16:46:56
+-- Dump completed on 2025-06-13  0:14:51
