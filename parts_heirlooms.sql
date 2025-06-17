@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `partsheirlooms` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `partsheirlooms`;
--- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: localhost    Database: partsheirlooms
 -- ------------------------------------------------------
--- Server version	8.0.34
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -148,6 +148,7 @@ CREATE TABLE `messages` (
   `receiver_user_id` int NOT NULL,
   `sender_user_id` int NOT NULL,
   `transaction_id` int DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`message_id`),
   KEY `FKrx9kj3k3dqvmcfk4my12a98c3` (`receiver_user_id`),
   KEY `FKk4mpqp6gfuaelpcamqv01brkr` (`sender_user_id`),
@@ -155,7 +156,7 @@ CREATE TABLE `messages` (
   CONSTRAINT `FK59qh3mdk2nfskojf0t5nphe04` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`),
   CONSTRAINT `FKk4mpqp6gfuaelpcamqv01brkr` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `FKrx9kj3k3dqvmcfk4my12a98c3` FOREIGN KEY (`receiver_user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -164,7 +165,7 @@ CREATE TABLE `messages` (
 
 LOCK TABLES `messages` WRITE;
 /*!40000 ALTER TABLE `messages` DISABLE KEYS */;
-INSERT INTO `messages` VALUES (1,'幾號出口?','2025-06-17 13:32:42.030528',2,3,1),(2,'我到了','2025-06-17 13:32:55.547375',3,2,1),(3,'你好','2025-06-17 16:49:48.341240',3,2,2),(4,'有嗎','2025-06-17 16:49:55.565385',2,3,2),(5,'可以嗎','2025-06-17 16:50:52.220590',3,2,2),(6,'有嗎','2025-06-17 16:54:21.854392',3,2,2),(7,'有嗎','2025-06-17 17:00:00.290611',2,3,2),(8,'沒有耶','2025-06-17 17:00:11.615807',3,2,2);
+INSERT INTO `messages` VALUES (1,'幾號出口?','2025-06-17 13:32:42.030528',2,3,1,1),(2,'我到了','2025-06-17 13:32:55.547375',3,2,1,1),(3,'你好','2025-06-17 16:49:48.341240',3,2,2,1),(4,'有嗎','2025-06-17 16:49:55.565385',2,3,2,1),(5,'可以嗎','2025-06-17 16:50:52.220590',3,2,2,1),(6,'有嗎','2025-06-17 16:54:21.854392',3,2,2,1),(7,'有嗎','2025-06-17 17:00:00.290611',2,3,2,1),(8,'沒有耶','2025-06-17 17:00:11.615807',3,2,2,1),(9,'有嗎','2025-06-17 20:48:08.941621',2,3,2,1),(10,'好耶','2025-06-17 20:49:00.859689',3,2,2,1),(11,'有','2025-06-17 23:48:23.357294',2,3,2,1),(12,'好','2025-06-17 23:49:46.991614',3,2,2,0),(13,'如何?','2025-06-17 23:53:53.399244',2,6,NULL,1),(14,'?','2025-06-17 23:56:51.663695',2,6,NULL,1),(15,'?','2025-06-18 00:05:55.032637',2,6,NULL,1),(16,'?','2025-06-18 00:26:49.244225',3,2,NULL,0),(17,'?','2025-06-18 00:27:02.361199',6,2,NULL,1),(18,'?','2025-06-18 00:29:16.482526',3,2,NULL,0),(19,'?','2025-06-18 00:29:20.111770',6,2,NULL,0),(20,'><','2025-06-18 00:31:27.856373',2,6,NULL,0);
 /*!40000 ALTER TABLE `messages` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -532,4 +533,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-17 17:06:15
+-- Dump completed on 2025-06-18  1:19:24
